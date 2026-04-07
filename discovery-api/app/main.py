@@ -43,7 +43,7 @@ def load_manifests() -> dict[str, dict]:
     manifests = {}
     if not MANIFESTS_DIR.exists():
         return manifests
-    for manifest_path in MANIFESTS_DIR.glob("*/manifest.json"):
+    for manifest_path in MANIFESTS_DIR.glob("**/manifest.json"):
         try:
             data = json.loads(manifest_path.read_text())
             if "id" in data:
