@@ -1,0 +1,34 @@
+# Environment files — NEVER commit real .env files
+**/.env
+!**/.env.example
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets
+*.secret
+*.key
+*.pem
+
+# Generated artifacts
+dist/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Logs
+*.log
+logs/
+
+# Docker volumes (if bind-mounted locally)
+data/
+volumes/
+
+# Node (if any tooling added later)
+node_modules/
