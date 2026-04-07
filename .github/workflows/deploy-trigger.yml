@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    # self-hosted runner はサーバー上で動作する（outbound only、NATの内側でも動作）
+    # セットアップ手順: README.md の「GitHub Actions Self-Hosted Runner のセットアップ」参照
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # deploy.sh が HEAD~1 との diff を取るために必要
+
+      - name: Deploy
+        run: bash scripts/deploy.sh
+
+      - name: Notify deploy result
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "Deploy succeeded: ${{ github.sha }} by ${{ github.actor }}"
+          else
+            echo "Deploy FAILED: ${{ github.sha }} by ${{ github.actor }}"
+          fi
+        # TODO: Slack/Discord 通知を追加する場合はここにステップを追加
+        # - uses: slackapi/slack-github-action@v1
+        #   with:
+        #     channel-id: 'deployments'
+        #     slack-message: 'Deploy ${{ job.status }}: ${{ github.sha }}'

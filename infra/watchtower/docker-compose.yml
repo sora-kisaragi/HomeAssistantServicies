@@ -1,0 +1,26 @@
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # チェック間隔（秒）: 3600 = 1時間ごと
+      - WATCHTOWER_POLL_INTERVAL=3600
+      # homeassistant.service=true ラベルが付いたコンテナのみ更新
+      - WATCHTOWER_LABEL_ENABLE=true
+      # 更新後に古いイメージを削除
+      - WATCHTOWER_CLEANUP=true
+      # 通知（オプション — Slack Webhook URLを設定する場合）
+      # - WATCHTOWER_NOTIFICATION_URL=slack://token@channel
+    labels:
+      # Watchtower 自身は自動更新対象にしない
+      com.centurylinklabs.watchtower.enable: "false"
+    networks:
+      - homeassistant
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

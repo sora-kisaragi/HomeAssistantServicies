@@ -1,0 +1,86 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files in each service
+        run: |
+          failed=0
+          for svc_dir in services/*/; do
+            svc=$(basename "$svc_dir")
+            for required in docker-compose.yml .env.example manifest.json README.md; do
+              if [[ ! -f "${svc_dir}${required}" ]]; then
+                echo "MISSING: ${svc_dir}${required}"
+                failed=1
+              fi
+            done
+          done
+          if [[ $failed -ne 0 ]]; then
+            echo ""
+            echo "Each service directory must contain: docker-compose.yml, .env.example, manifest.json, README.md"
+            exit 1
+          fi
+          echo "All required files present."
+
+      - name: Validate docker compose syntax
+        run: |
+          failed=0
+          for compose in services/*/docker-compose.yml discovery-api/docker-compose.yml; do
+            svc_dir=$(dirname "$compose")
+            # Use .env.example as placeholder .env so compose doesn't error on missing vars
+            if [[ -f "${svc_dir}/.env.example" ]]; then
+              cp "${svc_dir}/.env.example" "${svc_dir}/.env"
+            fi
+            if [[ -f ".env.example" ]]; then
+              cp ".env.example" ".env"
+            fi
+
+            if docker compose -f "$compose" config --quiet 2>&1; then
+              echo "  [OK]  $compose"
+            else
+              echo "  [FAIL] $compose"
+              failed=1
+            fi
+
+            rm -f "${svc_dir}/.env" ".env"
+          done
+          exit $failed
+
+      - name: Validate manifest.json files
+        run: |
+          failed=0
+          for manifest in services/*/manifest.json discovery-api/manifest.json; do
+            if python3 -m json.tool "$manifest" > /dev/null 2>&1; then
+              echo "  [OK]  $manifest"
+            else
+              echo "  [FAIL] $manifest"
+              failed=1
+            fi
+          done
+
+          # Check required fields
+          for manifest in services/*/manifest.json; do
+            for field in id display_name port; do
+              value=$(python3 -c "import json,sys; d=json.load(open('$manifest')); print(d.get('$field','MISSING'))" 2>/dev/null)
+              if [[ "$value" == "MISSING" || -z "$value" ]]; then
+                echo "MISSING field '$field' in $manifest"
+                failed=1
+              fi
+            done
+          done
+
+          exit $failed
+
+      - name: Lint Dockerfiles (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          ignore: DL3008,DL3009  # apt-get pin versions warnings (acceptable in dev)

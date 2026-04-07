@@ -1,0 +1,16 @@
+{
+  "id": "playwright-mcp",
+  "display_name": "PlaywrightMCP",
+  "description": "Playwright を使ったブラウザ自動化の MCP (Model Context Protocol) サーバー。LLM からブラウザ操作・スクリーンショット取得等が可能。",
+  "category": "automation",
+  "port": 3000,
+  "internal_url": "http://playwright-mcp:3000",
+  "icon": "browser",
+  "tags": ["mcp", "browser", "automation", "playwright"],
+  "docs_url": "https://github.com/microsoft/playwright-mcp",
+  "health_check": {
+    "path": "/",
+    "expected_status": 400
+  },
+  "env_vars": ["MCP_PORT"]
+}

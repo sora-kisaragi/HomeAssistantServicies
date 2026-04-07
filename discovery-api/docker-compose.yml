@@ -1,0 +1,37 @@
+services:
+  discovery-api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: discovery-api
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    volumes:
+      # Docker socket (read-only) to inspect running containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount all service manifests
+      - ../services:/manifests:ro
+    env_file:
+      - path: ../.env
+        required: false
+      - path: .env
+        required: false
+    environment:
+      - MANIFESTS_DIR=/manifests
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "discovery-api"
+      homeassistant.display_name: "Service Discovery API"
+      homeassistant.description: "稼働中のサービス一覧・ポート・ヘルス状態を返す API"
+      homeassistant.category: "infrastructure"
+      homeassistant.port: "8765"
+      homeassistant.icon: "api"
+      homeassistant.docs_url: "http://localhost:8765/docs"
+    networks:
+      - homeassistant
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

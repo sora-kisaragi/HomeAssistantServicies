@@ -1,0 +1,29 @@
+services:
+  playwright-mcp:
+    image: mcr.microsoft.com/playwright:v1.49.0-noble
+    container_name: playwright-mcp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ../../.env
+      - .env
+    environment:
+      - NODE_ENV=production
+    command: ["npx", "@playwright/mcp@latest", "--port", "3000", "--host", "0.0.0.0"]
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "playwright-mcp"
+      homeassistant.display_name: "PlaywrightMCP"
+      homeassistant.description: "Playwright を使ったブラウザ自動化の MCP サーバー"
+      homeassistant.category: "automation"
+      homeassistant.port: "3000"
+      homeassistant.icon: "browser"
+      homeassistant.docs_url: "https://github.com/microsoft/playwright-mcp"
+    networks:
+      - homeassistant
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

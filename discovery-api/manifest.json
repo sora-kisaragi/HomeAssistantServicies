@@ -1,0 +1,16 @@
+{
+  "id": "discovery-api",
+  "display_name": "Service Discovery API",
+  "description": "稼働中のサービス一覧・ポート・ヘルス状態を返す API。フロントエンドのサービス発見に使用。",
+  "category": "infrastructure",
+  "port": 8765,
+  "internal_url": "http://discovery-api:8765",
+  "icon": "api",
+  "tags": ["api", "infrastructure", "monitoring"],
+  "docs_url": "http://localhost:8765/docs",
+  "health_check": {
+    "path": "/api/health",
+    "expected_status": 200
+  },
+  "env_vars": []
+}
