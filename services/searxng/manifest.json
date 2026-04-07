@@ -1,0 +1,16 @@
+{
+  "id": "searxng",
+  "display_name": "SearXNG",
+  "description": "プライバシーを重視したメタ検索エンジン。Google・Bing等を横断検索しつつ追跡を回避する。",
+  "category": "search",
+  "port": 8080,
+  "internal_url": "http://searxng:8080",
+  "icon": "search",
+  "tags": ["search", "privacy", "oss"],
+  "docs_url": "https://docs.searxng.org",
+  "health_check": {
+    "path": "/healthz",
+    "expected_status": 200
+  },
+  "env_vars": ["SEARXNG_SECRET_KEY", "SEARXNG_BASE_URL"]
+}

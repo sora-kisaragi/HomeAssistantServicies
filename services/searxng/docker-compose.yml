@@ -1,0 +1,30 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/etc/searxng:rw
+    env_file:
+      - ../../.env
+      - .env
+    environment:
+      - SEARXNG_BASE_URL=http://${DOMAIN_NAME:-localhost}:8080
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "searxng"
+      homeassistant.display_name: "SearXNG"
+      homeassistant.description: "プライバシーを重視したメタ検索エンジン"
+      homeassistant.category: "search"
+      homeassistant.port: "8080"
+      homeassistant.icon: "search"
+      homeassistant.docs_url: "https://docs.searxng.org"
+    networks:
+      - homeassistant
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

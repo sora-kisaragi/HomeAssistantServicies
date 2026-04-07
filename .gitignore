@@ -32,3 +32,6 @@ volumes/
 
 # Node (if any tooling added later)
 node_modules/
+
+# Claude Code
+.claude/
