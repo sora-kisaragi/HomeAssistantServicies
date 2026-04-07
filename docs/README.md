@@ -7,3 +7,4 @@
 | [cicd.md](cicd.md) | CI/CD の仕組み（PR → 自動チェック → 自動デプロイ） |
 | [discovery-api.md](discovery-api.md) | サービス一覧 API の仕組みとレスポンス形式 |
 | [local-dev.md](local-dev.md) | WSL2 でのローカル開発環境セットアップ手順 |
+| [next-tasks.md](next-tasks.md) | 今後の課題・GitHub 設定 Todo 一覧 |
