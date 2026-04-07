@@ -10,8 +10,8 @@ services:
     volumes:
       # Docker socket (read-only) to inspect running containers
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Mount all service manifests
-      - ../services:/manifests:ro
+      # Mount project root so all manifest.json files are discoverable
+      - ..:/manifests:ro
     env_file:
       - path: ../.env
         required: false

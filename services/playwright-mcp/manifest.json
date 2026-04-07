@@ -10,7 +10,7 @@
   "docs_url": "https://github.com/microsoft/playwright-mcp",
   "health_check": {
     "path": "/",
-    "expected_status": 400
+    "expected_status": 403
   },
   "env_vars": ["MCP_PORT"]
 }
