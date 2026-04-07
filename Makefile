@@ -1,4 +1,4 @@
-.PHONY: help validate deploy health manifest add-service up down logs pull network
+.PHONY: help validate deploy health manifest add-service up down logs pull network setup-dev lint
 
 REPO_DIR := $(shell pwd)
 SERVICE ?=
@@ -12,6 +12,19 @@ help: ## このヘルプを表示
 	@echo "    SERVICE=<name>   対象サービス名 (up/down/logs/pull で使用)"
 	@echo "    NAME=<name>      新サービス名 (add-service で使用)"
 	@echo "    PORT=<number>    新サービスのポート (add-service で使用)"
+
+setup-dev: ## 開発環境セットアップ（pre-commit フックをインストール）
+	@if ! command -v pipx >/dev/null 2>&1; then \
+		echo "pipx が見つかりません。インストールします..."; \
+		sudo apt install -y pipx; \
+	fi
+	pipx install pre-commit
+	export PATH="$${HOME}/.local/bin:$$PATH" && pre-commit install
+	@echo "pre-commit hooks installed."
+	@echo "※ 次のターミナルから pre-commit コマンドが直接使えます（pipx ensurepath で PATH に追加済み）。"
+
+lint: ## 全ファイルに lint + format を実行（pre-commit --all-files）
+	export PATH="$${HOME}/.local/bin:$$PATH" && pre-commit run --all-files
 
 network: ## homeassistant Docker ネットワークを作成（初回のみ）
 	docker network create homeassistant 2>/dev/null || echo "Network 'homeassistant' already exists"
@@ -64,30 +77,36 @@ up: ## 特定サービスを起動 (SERVICE=<name> 必須)
 	@if [ -z "$(SERVICE)" ]; then echo "Usage: make up SERVICE=<name>"; exit 1; fi
 	@if [ -f "services/$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f services/$(SERVICE)/docker-compose.yml up -d; \
+	elif [ -f "infra/$(SERVICE)/docker-compose.yml" ]; then \
+		docker compose -f infra/$(SERVICE)/docker-compose.yml up -d; \
 	elif [ -f "$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f $(SERVICE)/docker-compose.yml up -d; \
 	else \
-		echo "Not found: services/$(SERVICE)/docker-compose.yml"; exit 1; \
+		echo "Not found: $(SERVICE)"; exit 1; \
 	fi
 
 down: ## 特定サービスを停止 (SERVICE=<name> 必須)
 	@if [ -z "$(SERVICE)" ]; then echo "Usage: make down SERVICE=<name>"; exit 1; fi
 	@if [ -f "services/$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f services/$(SERVICE)/docker-compose.yml down; \
+	elif [ -f "infra/$(SERVICE)/docker-compose.yml" ]; then \
+		docker compose -f infra/$(SERVICE)/docker-compose.yml down; \
 	elif [ -f "$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f $(SERVICE)/docker-compose.yml down; \
 	else \
-		echo "Not found: services/$(SERVICE)/docker-compose.yml"; exit 1; \
+		echo "Not found: $(SERVICE)"; exit 1; \
 	fi
 
 logs: ## 特定サービスのログを tail (SERVICE=<name> 必須)
 	@if [ -z "$(SERVICE)" ]; then echo "Usage: make logs SERVICE=<name>"; exit 1; fi
 	@if [ -f "services/$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f services/$(SERVICE)/docker-compose.yml logs -f; \
+	elif [ -f "infra/$(SERVICE)/docker-compose.yml" ]; then \
+		docker compose -f infra/$(SERVICE)/docker-compose.yml logs -f; \
 	elif [ -f "$(SERVICE)/docker-compose.yml" ]; then \
 		docker compose -f $(SERVICE)/docker-compose.yml logs -f; \
 	else \
-		echo "Not found: services/$(SERVICE)/docker-compose.yml"; exit 1; \
+		echo "Not found: $(SERVICE)"; exit 1; \
 	fi
 
 pull: ## 全イメージの最新版を pull

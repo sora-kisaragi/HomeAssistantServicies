@@ -32,7 +32,7 @@ while IFS= read -r changed_file; do
     if [[ "${changed_file}" =~ ^services/([^/]+)/ ]]; then
         svc="${BASH_REMATCH[1]}"
         # 重複を除外
-        if [[ ! " ${CHANGED_SERVICES[*]} " =~ " ${svc} " ]]; then
+        if [[ " ${CHANGED_SERVICES[*]} " != *" ${svc} "* ]]; then
             CHANGED_SERVICES+=("${svc}")
         fi
     fi
