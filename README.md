@@ -1,17 +1,26 @@
 # HomeAssistantServicies
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Validate](https://github.com/sora-kisaragi/HomeAssistantServicies/actions/workflows/validate.yml/badge.svg)](https://github.com/sora-kisaragi/HomeAssistantServicies/actions/workflows/validate.yml)
+[![GitHub last commit](https://img.shields.io/github/last-commit/sora-kisaragi/HomeAssistantServicies)](https://github.com/sora-kisaragi/HomeAssistantServicies/commits/main)
+
 PlaywrightMCP・SearXNG などの OSS コンテナをまとめて管理するリポジトリです。
 各サービスの Docker Compose 設定、自動デプロイ、ヘルスチェックをここで一元管理します。
 
+> **自分のサーバーで使いたい場合は Fork してください。**
+> このリポジトリは個人設定のため、直接の push 権限はオーナーのみです。
+> Fork すれば自由にカスタマイズでき、このリポジトリの更新を取り込むことも可能です。
+> 詳しくは [docs/git-workflow.md#fork-して使う](docs/git-workflow.md#fork-して使う) を参照してください。
+
 ## このリポジトリでできること
 
-| やりたいこと | 手段 |
-| --- | --- |
-| 新しいサービスを追加する | `make add-service NAME=foo PORT=8090` でテンプレート生成 → PR |
-| PR 時に設定ミスを検出する | GitHub Actions が自動で compose 構文・manifest を検証 |
-| main マージで自動デプロイ | サーバー上の self-hosted runner が `deploy.sh` を実行 |
-| 稼働サービス一覧を API で取得 | `GET http://<server>:8765/api/services` |
-| フロントエンドからサービスを発見 | 上記 API のレスポンスに port・health・メタ情報が含まれる |
+| やりたいこと                     | 手段                                                          |
+| -------------------------------- | ------------------------------------------------------------- |
+| 新しいサービスを追加する         | `make add-service NAME=foo PORT=8090` でテンプレート生成 → PR |
+| PR 時に設定ミスを検出する        | GitHub Actions が自動で compose 構文・manifest を検証         |
+| main マージで自動デプロイ        | サーバー上の self-hosted runner が `deploy.sh` を実行         |
+| 稼働サービス一覧を API で取得    | `GET http://<server>:8765/api/services`                       |
+| フロントエンドからサービスを発見 | 上記 API のレスポンスに port・health・メタ情報が含まれる      |
 
 ## ディレクトリ構成
 
@@ -69,12 +78,12 @@ services/<name>/
 
 その他のエンドポイント：
 
-| エンドポイント | 説明 |
-| --- | --- |
-| `GET /api/services` | 全サービス一覧 |
-| `GET /api/services/{id}` | 単体サービス詳細 |
-| `GET /api/health` | API 自身の死活確認 |
-| `GET /docs` | Swagger UI（ブラウザで確認） |
+| エンドポイント           | 説明                         |
+| ------------------------ | ---------------------------- |
+| `GET /api/services`      | 全サービス一覧               |
+| `GET /api/services/{id}` | 単体サービス詳細             |
+| `GET /api/health`        | API 自身の死活確認           |
+| `GET /docs`              | Swagger UI（ブラウザで確認） |
 
 ## 新サービスの追加手順
 
@@ -115,10 +124,10 @@ cp services/searxng/.env.example services/searxng/.env && nano services/searxng/
 cp services/playwright-mcp/.env.example services/playwright-mcp/.env
 
 # サービスを起動
-docker compose -f discovery-api/docker-compose.yml up -d
-docker compose -f services/searxng/docker-compose.yml up -d
-docker compose -f services/playwright-mcp/docker-compose.yml up -d
-docker compose -f infra/watchtower/docker-compose.yml up -d
+make up SERVICE=discovery-api
+make up SERVICE=searxng
+make up SERVICE=playwright-mcp
+make up SERVICE=watchtower
 
 # 動作確認
 make health
@@ -177,16 +186,19 @@ make down SERVICE=searxng  # 特定サービスを停止
 make logs SERVICE=searxng  # ログを tail
 make pull                  # 全イメージを更新
 make add-service NAME=foo PORT=8090  # 新サービスのスキャフォールド
+make setup-dev             # pre-commit フックをインストール（初回のみ）
+make lint                  # 全ファイルに lint + format を実行
 ```
 
 ## 詳細ドキュメント
 
 仕組みをもっと詳しく知りたい場合は [docs/](docs/) を参照してください。
 
-| ドキュメント | 内容 |
-| --- | --- |
-| [docs/overview.md](docs/overview.md) | リポジトリ全体の仕組みと登場人物 |
-| [docs/make-guide.md](docs/make-guide.md) | `make` コマンドの使い方 |
-| [docs/cicd.md](docs/cicd.md) | CI/CD の仕組み（自動チェック・自動デプロイ） |
-| [docs/discovery-api.md](docs/discovery-api.md) | サービス一覧 API の仕組みとレスポンス形式 |
-| [docs/local-dev.md](docs/local-dev.md) | WSL2 でのローカル開発環境セットアップ手順 |
+| ドキュメント                                   | 内容                                                  |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| [docs/overview.md](docs/overview.md)           | リポジトリ全体の仕組みと登場人物                      |
+| [docs/make-guide.md](docs/make-guide.md)       | `make` コマンドの使い方                               |
+| [docs/cicd.md](docs/cicd.md)                   | CI/CD の仕組み（自動チェック・自動デプロイ）          |
+| [docs/discovery-api.md](docs/discovery-api.md) | サービス一覧 API の仕組みとレスポンス形式             |
+| [docs/local-dev.md](docs/local-dev.md)         | WSL2 でのローカル開発環境セットアップ手順             |
+| [docs/git-workflow.md](docs/git-workflow.md)   | Git 運用方針（GitHub Flow・ブランチ命名・PR ルール）  |

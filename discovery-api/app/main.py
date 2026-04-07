@@ -2,9 +2,8 @@ import json
 import os
 import socket
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
 
 import docker
 import httpx
@@ -26,10 +25,10 @@ app.add_middleware(
 
 MANIFESTS_DIR = Path(os.getenv("MANIFESTS_DIR", "/manifests"))
 LABEL_PREFIX = "homeassistant"
-docker_client: Optional[docker.DockerClient] = None
+docker_client: docker.DockerClient | None = None
 
 
-def get_docker_client() -> Optional[docker.DockerClient]:
+def get_docker_client() -> docker.DockerClient | None:
     global docker_client
     if docker_client is None:
         try:
@@ -74,16 +73,17 @@ def get_running_containers() -> dict[str, dict]:
             uptime_seconds = None
             if started_at:
                 try:
-                    from datetime import datetime
                     start_dt = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
-                    uptime_seconds = int((datetime.now(timezone.utc) - start_dt).total_seconds())
+                    uptime_seconds = int((datetime.now(UTC) - start_dt).total_seconds())
                 except Exception:
                     pass
 
             containers[service_id] = {
                 "id": container.short_id,
                 "name": container.name,
-                "image": container.image.tags[0] if container.image.tags else container.image.short_id,
+                "image": container.image.tags[0]
+                if container.image.tags
+                else container.image.short_id,
                 "status": container.status,
                 "started_at": started_at,
                 "uptime_seconds": uptime_seconds,
@@ -94,7 +94,9 @@ def get_running_containers() -> dict[str, dict]:
     return containers
 
 
-async def probe_health(service_id: str, port: int, health_path: str, expected_status: int = 200) -> dict:
+async def probe_health(
+    service_id: str, port: int, health_path: str, expected_status: int = 200
+) -> dict:
     """サービスのヘルスエンドポイントを実際にプローブする"""
     url = f"http://{service_id}:{port}{health_path}"
     start = time.monotonic()
@@ -105,18 +107,18 @@ async def probe_health(service_id: str, port: int, health_path: str, expected_st
             status = "healthy" if resp.status_code == expected_status else "unhealthy"
             return {
                 "status": status,
-                "last_checked": datetime.now(timezone.utc).isoformat(),
+                "last_checked": datetime.now(UTC).isoformat(),
                 "response_time_ms": elapsed_ms,
             }
     except Exception:
         return {
             "status": "unreachable",
-            "last_checked": datetime.now(timezone.utc).isoformat(),
+            "last_checked": datetime.now(UTC).isoformat(),
             "response_time_ms": None,
         }
 
 
-def build_service_entry(service_id: str, manifest: dict, container: Optional[dict]) -> dict:
+def build_service_entry(service_id: str, manifest: dict, container: dict | None) -> dict:
     entry = {
         "id": service_id,
         "display_name": manifest.get("display_name", service_id),
@@ -147,7 +149,7 @@ def build_service_entry(service_id: str, manifest: dict, container: Optional[dic
 @app.get("/api/health")
 async def api_health():
     """API自身の死活確認"""
-    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
+    return {"status": "ok", "timestamp": datetime.now(UTC).isoformat()}
 
 
 @app.get("/api/services")
@@ -177,12 +179,16 @@ async def list_services():
         elif container and container["status"] == "running":
             entry["health"] = {"status": "unknown", "last_checked": None, "response_time_ms": None}
         else:
-            entry["health"] = {"status": "unreachable", "last_checked": None, "response_time_ms": None}
+            entry["health"] = {
+                "status": "unreachable",
+                "last_checked": None,
+                "response_time_ms": None,
+            }
 
         services.append(entry)
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "host": socket.gethostname(),
         "services": services,
     }
@@ -227,11 +233,15 @@ async def get_service_health(service_id: str):
     manifests = load_manifests()
     manifest = manifests.get(service_id)
     if manifest is None:
-        raise HTTPException(status_code=404, detail=f"Service '{service_id}' not found in manifests")
+        raise HTTPException(
+            status_code=404, detail=f"Service '{service_id}' not found in manifests"
+        )
 
     health_check = manifest.get("health_check")
     if not health_check:
-        raise HTTPException(status_code=422, detail=f"Service '{service_id}' has no health_check configured")
+        raise HTTPException(
+            status_code=422, detail=f"Service '{service_id}' has no health_check configured"
+        )
 
     result = await probe_health(
         service_id,
