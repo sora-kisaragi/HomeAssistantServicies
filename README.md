@@ -18,7 +18,7 @@ PlaywrightMCP・SearXNG などの OSS コンテナをまとめて管理するリ
 | -------------------------------- | ------------------------------------------------------------- |
 | 新しいサービスを追加する         | `make add-service NAME=foo PORT=8090` でテンプレート生成 → PR |
 | PR 時に設定ミスを検出する        | GitHub Actions が自動で compose 構文・manifest を検証         |
-| main マージで自動デプロイ        | サーバー上の self-hosted runner が `deploy.sh` を実行         |
+| main マージで手動デプロイ        | サーバーで `scripts/deploy.sh` を手動実行                     |
 | 稼働サービス一覧を API で取得    | `GET http://<server>:8765/api/services`                       |
 | フロントエンドからサービスを発見 | 上記 API のレスポンスに port・health・メタ情報が含まれる      |
 
@@ -133,23 +133,14 @@ make up SERVICE=watchtower
 make health
 ```
 
-### self-hosted runner のセットアップ（自動デプロイ）
+### デプロイ（手動）
 
-main マージ時にサーバーが自動でデプロイを行うための設定。
-サーバーからの **outbound 接続のみ**で動作するため、NATの内側でも使えます。
+main マージ後、サーバーで以下を手動実行してデプロイします。
 
 ```bash
-# 1. GitHub: Settings > Actions > Runners > New self-hosted runner
-#    表示されるコマンドをコピーして実行
-
-mkdir -p /opt/actions-runner && cd /opt/actions-runner
-# （GitHub が表示するダウンロード・設定コマンドをここで実行）
-
-# 2. systemd サービスとして登録して起動
-sudo ./svc.sh install && sudo ./svc.sh start
-
-# 3. 確認
-sudo ./svc.sh status
+cd /opt/homeassistant
+git pull origin main
+bash scripts/deploy.sh
 ```
 
 ## CI/CD の流れ
@@ -162,7 +153,7 @@ PR 作成
        └─ 必須ファイルの存在確認
 
 main にマージ
-  └─ deploy-trigger.yml が self-hosted runner で実行
+  └─ サーバーで手動実行
        └─ scripts/deploy.sh
             ├─ git pull
             ├─ 変更されたサービスだけ pull + up -d

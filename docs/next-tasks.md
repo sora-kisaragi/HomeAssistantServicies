@@ -10,19 +10,19 @@
 - [ ] 各サービスの `.env` を作成（シークレットを設定）
 - [ ] `make network` でネットワーク作成
 - [ ] 全サービスを起動して `make health` で確認
-- [ ] self-hosted runner を設定（`README.md` の手順参照）
-- [ ] main へのマージで自動デプロイが動くことを確認
+- [ ] main マージ後に `git pull && bash scripts/deploy.sh` で手動デプロイして動作確認
 
 ### 2. GitHub リポジトリの保護設定
 → 詳細は下の「GitHub 側でやること」セクションを参照
 
-### 3. deploy.sh の `git pull` 重複問題
-`scripts/deploy.sh` 内の `git pull` は self-hosted runner 経由の場合は不要。
-`actions/checkout@v4` がすでに最新コードをチェックアウトしているため。
+### 3. deploy.sh の手動実行フロー
+デプロイは `main` マージ後にサーバーで手動実行する運用。
 
-対処案：
-- `deploy.sh` から `git pull` を削除し、runner の checkout に完全に委ねる
-- サーバー手動実行時のために `SKIP_GIT_PULL=1 bash scripts/deploy.sh` のようなフラグを追加
+```bash
+cd /opt/homeassistant
+git pull origin main
+bash scripts/deploy.sh
+```
 
 ---
 
@@ -105,7 +105,3 @@ GitHub 側で Environment を作成しないと保護が効かない。
 | --- | --- | --- |
 | Required reviewers | 自分のアカウント | デプロイ前に手動承認が入る |
 | Deployment branches | Selected branches: `main` | main 以外からのデプロイを禁止 |
-
-### self-hosted runner のセットアップ
-本番サーバーへの展開と合わせて実施。
-`README.md` の「GitHub Actions Self-Hosted Runner のセットアップ」を参照。

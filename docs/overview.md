@@ -83,7 +83,7 @@ GitHub のサーバー上で自動的にスクリプトが走ります。
    └─ GitHub Actions が自動で構文チェックを実行
 
 4. PR をレビューして main にマージ
-   └─ サーバー上の runner が deploy.sh を実行
+   └─ サーバーで手動実行（git pull && bash scripts/deploy.sh）
       └─ myapp コンテナが起動
 
 5. discovery-api が自動的に myapp を検出

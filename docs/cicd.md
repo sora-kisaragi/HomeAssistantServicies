@@ -21,11 +21,12 @@
   │                       │                         │
   ├─ main にマージ ───────►│                         │
   │                       ├─ deploy-trigger.yml 実行│
-  │                       │   └─ self-hosted runner ─►│
-  │                       │                         ├─ git pull
+  │◄── CI 結果（成功/失敗）─┤                         │
+  │                       │                         │
+  ├─ サーバーで手動実行 ────────────────────────────►│
+  │   scripts/deploy.sh   │                         ├─ git pull
   │                       │                         ├─ コンテナ再起動
   │                       │                         └─ ヘルスチェック
-  │                       │◄── 結果（成功/失敗） ────┤
 ```
 
 ---
@@ -67,27 +68,10 @@ YAML の書き方ミスや、存在しない設定キーを検出できます。
 
 **いつ動く？** → `main` ブランチに push（= PR マージ）されたとき
 
-**何をするか？** サーバー上の self-hosted runner が `scripts/deploy.sh` を実行します。
+**何をするか？** main へのマージをトリガーに CI が通ったことを確認した後、サーバーで手動で `scripts/deploy.sh` を実行します。
 
-### self-hosted runner とは？
-
-通常の GitHub Actions は GitHub のクラウドサーバーで動きます。
-しかし自宅サーバーへのデプロイには使えません（GitHub からサーバーに入れない）。
-
-`self-hosted runner` はサーバー側に常駐するプログラムで、
-**サーバーから GitHub へ** outbound 接続してジョブを受け取ります。
-サーバーに inbound ポートを開ける必要がないため、NAT の内側でも動作します。
-
-```text
-GitHub
-  │
-  │◄────────────────── サーバーが接続を維持（outbound）
-  │
-  └─ 「deploy job が来たよ」と通知
-            │
-            ▼
-       サーバー上で deploy.sh が実行される
-```
+> **自動デプロイ（self-hosted runner）は使用しない方針です。**
+> main マージ後はサーバーにログインして `git pull && bash scripts/deploy.sh` を手動実行してください。
 
 ### deploy.sh の動作
 
@@ -137,5 +121,5 @@ https://github.com/sora-kisaragi/HomeAssistantServicies/actions
 | 懸念 | 対策 |
 | --- | --- |
 | `.env`（パスワード等）が GitHub に漏れる | `.gitignore` で除外。絶対にコミットしない |
-| runner が乗っ取られてサーバーが危険になる | GitHub の `environment` 保護ルールで承認フローを追加できる |
+| 誰でもデプロイできてしまう | main マージ後の手動実行なので意図しないデプロイが起きにくい |
 | 誰でも main にマージできる | Branch Protection Rules で PR レビュー必須にする |

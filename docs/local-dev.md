@@ -120,10 +120,10 @@ make validate
 ログ出力先 `/var/log/homeassistant/` が WSL に存在しないためエラーになります。
 ローカルでは `make up` / `make down` で個別に操作してください。
 
-### self-hosted runner はローカルでは不要
+### デプロイはサーバーで手動実行
 
-自動デプロイの仕組み（GitHub Actions self-hosted runner）はサーバー本番環境専用です。
-ローカルでは手動で `make up` するだけで十分です。
+本番デプロイは `main` マージ後にサーバーで `git pull && bash scripts/deploy.sh` を手動実行します。
+ローカルでは `make up` するだけで十分です。
 
 ### Windows 側のブラウザからアクセスするには
 
