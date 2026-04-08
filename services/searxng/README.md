@@ -4,7 +4,7 @@
 
 - **Port**: 8080
 - **Image**: `searxng/searxng:latest`
-- **Docs**: https://docs.searxng.org
+- **Docs**: <https://docs.searxng.org>
 
 ## セットアップ
 

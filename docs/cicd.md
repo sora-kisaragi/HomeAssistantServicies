@@ -38,6 +38,7 @@
 **何をするか？** GitHub のクラウドサーバー（ubuntu-latest）上で以下を実行します：
 
 ### ステップ1：必須ファイルの確認
+
 `services/` 配下の全フォルダに、以下の4ファイルが揃っているか確認します。
 
 ```text
@@ -50,6 +51,7 @@ README.md
 1つでも欠けていると PR がブロックされます。
 
 ### ステップ2：docker compose の構文チェック
+
 各サービスの `docker-compose.yml` を `docker compose config` コマンドで検証します。
 YAML の書き方ミスや、存在しない設定キーを検出できます。
 
@@ -57,9 +59,11 @@ YAML の書き方ミスや、存在しない設定キーを検出できます。
 > これにより「環境変数が定義されていない」というエラーを防ぎます。
 
 ### ステップ3：manifest.json の検証
+
 各 `manifest.json` が正しい JSON 形式か、必須フィールド（`id`・`display_name`・`port`）があるか確認します。
 
 ### ステップ4：Dockerfile の lint（hadolint）
+
 `Dockerfile` があれば、セキュリティや最善策の観点でチェックします。
 
 ---
