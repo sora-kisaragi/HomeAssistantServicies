@@ -39,7 +39,8 @@ make help
 ## コマンド一覧
 
 ### `make network`
-**Docker の共有ネットワークを作る（初回のみ）**
+
+Docker の共有ネットワークを作る（初回のみ）。
 
 このリポジトリの全コンテナは `homeassistant` という名前のネットワークで通信します。
 サーバーに初めてセットアップするときに一度だけ実行します。
@@ -51,9 +52,11 @@ make network
 ---
 
 ### `make validate`
-**設定ファイルに間違いがないか確認する**
+
+設定ファイルに間違いがないか確認する。
 
 以下を一括チェックします：
+
 - 各 `docker-compose.yml` の書き方が正しいか
 - 各 `manifest.json` が正しい JSON か
 
@@ -77,7 +80,8 @@ make validate
 ---
 
 ### `make health`
-**全サービスが正常に動いているか確認する**
+
+全サービスが正常に動いているか確認する。
 
 各サービスのヘルスチェック URL を実際に叩いて、応答があるか確認します。
 
@@ -97,7 +101,8 @@ Results: 1 passed, 1 failed, 1 skipped
 ---
 
 ### `make up SERVICE=<名前>`
-**特定のサービスを起動する**
+
+特定のサービスを起動する。
 
 ```bash
 make up SERVICE=searxng
@@ -111,7 +116,8 @@ make up SERVICE=discovery-api
 ---
 
 ### `make down SERVICE=<名前>`
-**特定のサービスを停止する**
+
+特定のサービスを停止する。
 
 ```bash
 make down SERVICE=searxng
@@ -122,7 +128,8 @@ make down SERVICE=searxng
 ---
 
 ### `make logs SERVICE=<名前>`
-**特定のサービスのログをリアルタイムで見る**
+
+特定のサービスのログをリアルタイムで見る。
 
 ```bash
 make logs SERVICE=searxng
@@ -133,7 +140,8 @@ make logs SERVICE=searxng
 ---
 
 ### `make pull`
-**全サービスの Docker イメージを最新版に更新する**
+
+全サービスの Docker イメージを最新版に更新する。
 
 ```bash
 make pull
@@ -147,26 +155,29 @@ make pull
 ---
 
 ### `make deploy`
-**サーバー上で手動デプロイを実行する**
+
+サーバー上で手動デプロイを実行する。
 
 ```bash
 make deploy
 ```
 
-**サーバー上で実行するコマンドです。ローカル PC からは実行しません。**
+> サーバー上で実行するコマンドです。ローカル PC からは実行しません。
 
 内部では `scripts/deploy.sh` が走ります：
+
 1. `git pull` で最新コードを取得
 2. 変更されたサービスだけコンテナを再起動
 3. discovery-api を再起動
 4. ヘルスチェックを実行
 
-通常は GitHub にマージすると自動でこれが走るので、手動実行が必要な場面は少ないです。
+main へのマージ後にサーバーで実行します。
 
 ---
 
 ### `make manifest`
-**サービス一覧 JSON を生成する**
+
+サービス一覧 JSON を生成する。
 
 ```bash
 make manifest
@@ -178,7 +189,8 @@ discovery-api が動いていれば自動で読み込まれるため、通常は
 ---
 
 ### `make add-service NAME=<名前> PORT=<ポート>`
-**新サービスのテンプレートを生成する**
+
+新サービスのテンプレートを生成する。
 
 ```bash
 make add-service NAME=grafana PORT=3001

@@ -10,6 +10,7 @@
 
 - **粒度の基準**：1 コミット = 1 つの論理的な変更（バグ修正、機能追加、ドキュメント更新など）
 - **メッセージ形式**：Conventional Commits（英語）
+
   | プレフィックス | 用途 |
   | --- | --- |
   | `feat:` | 新機能 |
@@ -17,9 +18,11 @@
   | `docs:` | ドキュメント変更 |
   | `chore:` | 設定・ツール・ビルド |
   | `refactor:` | リファクタリング |
+
 - **必須**：`git commit` は常に `PYTHONUTF8=1` を前置する（後述）
 - **Co-Author 行を付ける**：
-  ```
+
+  ```text
   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
   ```
 
@@ -67,7 +70,7 @@ git push
 
 ### ブランチ命名
 
-```
+```text
 feat/<topic>   — 新機能
 fix/<topic>    — バグ修正
 docs/<topic>   — ドキュメント
@@ -84,6 +87,14 @@ cd /opt/homeassistant
 git pull origin main
 bash scripts/deploy.sh
 ```
+
+### Markdown 記述ルール
+
+- 段落（文章の塊）の間は必ず**空行を1行**入れる
+- コードブロックには必ず言語を指定する（`bash`, `text`, `json` など）
+- 見出し（`###`）の直後に `**太字**` だけの行を置かない（MD036違反）
+- 見出しの前後は必ず空行を入れる
+- `pre-commit` の `markdownlint` が自動チェックする（`.markdownlint.yml` 参照）
 
 ### 言語使い分け
 

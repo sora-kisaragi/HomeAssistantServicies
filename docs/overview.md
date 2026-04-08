@@ -39,6 +39,7 @@ GitHub
 ## 主要な登場人物
 
 ### `services/<名前>/` フォルダ
+
 1サービス = 1フォルダです。フォルダの中に4つのファイルを置くのがルールです。
 
 | ファイル | 役割 |
@@ -49,22 +50,27 @@ GitHub
 | `README.md` | そのサービスの説明書 |
 
 ### `discovery-api/`
+
 サーバー上で動く小さな API サーバーです。
 Docker のソケット（通信口）を覗いて「今どのコンテナが動いているか」を調べ、
 `/api/services` にアクセスすると JSON で一覧を返します。
 
 ### `scripts/`
+
 シェルスクリプト（`.sh` ファイル）の集まりです。
+
 - `deploy.sh` — git pull → 変更サービスだけ再起動、という一連の作業を自動化
 - `health-check.sh` — 全サービスの URL を叩いて生きているか確認
 - `add-service.sh` — 新サービスのフォルダをテンプレートから自動生成
 
 ### `Makefile`
+
 「よく使うコマンドのショートカット集」です。
 `make validate` と打つだけで、長い docker compose コマンドを毎回書かずに済みます。
 → 詳しくは [make-guide.md](make-guide.md) を参照。
 
 ### `.github/workflows/`
+
 GitHub Actions の設定ファイルです。PR を出したりマージしたりすると、
 GitHub のサーバー上で自動的にスクリプトが走ります。
 → 詳しくは [cicd.md](cicd.md) を参照。

@@ -1,0 +1,33 @@
+default: true
+
+# 行長は長めに許容（表・URL があるため）
+MD013:
+  line_length: 200
+  tables: false
+  code_blocks: false
+
+# 見出し周りの空行（必須）
+MD022: true
+
+# コードブロック周りの空行（必須）
+MD031: true
+
+# リスト周りの空行（必須）
+MD032: true
+
+# インラインHTMLは許容（<br> 等）
+MD033: false
+
+# ファイル末尾の改行
+MD047: true
+
+# 重複見出しはファイル単位で許容（複数ドキュメントをまとめている場合）
+MD024:
+  siblings_only: true
+
+# ordered listの番号は 1. 1. 1. スタイルを許容
+MD029:
+  style: ordered
+
+# テーブルのカラム幅整列は強制しない（日本語混在で幅が合わないため）
+MD060: false
