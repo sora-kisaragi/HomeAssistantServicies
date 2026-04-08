@@ -4,19 +4,20 @@
 
 `make` は「長いコマンドに短い名前をつけて呼び出せるツール」です。
 
-たとえば、SearXNG を起動するには本来こう打ちます：
+たとえば、SearXNG を起動するには本来こう打ちます。
 
 ```bash
 docker compose -f services/searxng/docker-compose.yml up -d
 ```
 
-`Makefile` にこれを登録しておけば、こう書くだけで済みます：
+`Makefile` にこれを登録しておけば、こう書くだけで済みます。
 
 ```bash
 make up SERVICE=searxng
 ```
 
 このリポジトリの `Makefile` はその登録ファイルです。
+
 `make` を使わなくても動きますが、使うと楽になります。
 
 ---
@@ -43,6 +44,7 @@ make help
 Docker の共有ネットワークを作る（初回のみ）。
 
 このリポジトリの全コンテナは `homeassistant` という名前のネットワークで通信します。
+
 サーバーに初めてセットアップするときに一度だけ実行します。
 
 ```bash
@@ -55,7 +57,7 @@ make network
 
 設定ファイルに間違いがないか確認する。
 
-以下を一括チェックします：
+以下を一括チェックします。
 
 - 各 `docker-compose.yml` の書き方が正しいか
 - 各 `manifest.json` が正しい JSON か
@@ -83,7 +85,7 @@ make validate
 
 全サービスが正常に動いているか確認する。
 
-各サービスのヘルスチェック URL を実際に叩いて、応答があるか確認します。
+各サービスのヘルスチェック URL を実際に叩いて応答があるか確認します。
 
 ```bash
 make health
@@ -111,6 +113,7 @@ make up SERVICE=discovery-api
 ```
 
 内部では `docker compose -f services/searxng/docker-compose.yml up -d` が実行されます。
+
 `-d` はバックグラウンドで動かすオプションです。
 
 ---
@@ -148,6 +151,7 @@ make pull
 ```
 
 イメージを落とすだけで、コンテナの再起動はしません。
+
 再起動するには別途 `make up SERVICE=<名前>` が必要です。
 
 （Watchtower を使っている場合は自動で更新されるため、手動実行は不要です）
@@ -164,7 +168,7 @@ make deploy
 
 > サーバー上で実行するコマンドです。ローカル PC からは実行しません。
 
-内部では `scripts/deploy.sh` が走ります：
+内部では `scripts/deploy.sh` が走ります。
 
 1. `git pull` で最新コードを取得
 2. 変更されたサービスだけコンテナを再起動
@@ -184,6 +188,7 @@ make manifest
 ```
 
 `services/*/manifest.json` を読み込んで、`dist/services-manifest.json` にまとめます。
+
 discovery-api が動いていれば自動で読み込まれるため、通常は実行不要です。
 
 ---
@@ -196,7 +201,7 @@ discovery-api が動いていれば自動で読み込まれるため、通常は
 make add-service NAME=grafana PORT=3001
 ```
 
-`services/grafana/` フォルダが作られ、以下のテンプレートファイルが入ります：
+`services/grafana/` フォルダが作られ、以下のテンプレートファイルが入ります。
 
 ```text
 services/grafana/

@@ -1,6 +1,8 @@
 # SearXNG
 
-プライバシーを重視したメタ検索エンジン。Google・Bing等を横断検索しつつトラッキングを回避する。
+プライバシーを重視したメタ検索エンジン。
+
+Google・Bing等を横断検索しつつトラッキングを回避する。
 
 - **Port**: 8080
 - **Image**: `searxng/searxng:latest`

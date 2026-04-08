@@ -45,6 +45,7 @@ make add-service NAME=myservice PORT=8090
 ### バグ修正・改善
 
 - Issue を作成してから PR を出すことを推奨しますが、軽微な修正は直接 PR でも構いません。
+
 - `discovery-api` の変更は `make validate` に加えて手動での動作確認もお願いします。
 
 ## コミットメッセージ規約

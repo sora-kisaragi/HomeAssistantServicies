@@ -33,8 +33,7 @@ bash scripts/deploy.sh
 
 ### 4. discovery-api の manifest 読み込み改善
 
-`GET /api/services` のレスポンスで discovery-api 自身が `display_name: "discovery-api"`
-（manifest.json の値ではなくコンテナ名のデフォルト）になっている。
+`GET /api/services` のレスポンスで discovery-api 自身が `display_name: "discovery-api"`（manifest.json の値ではなくコンテナ名のデフォルト）になっている。
 
 原因：`discovery-api/manifest.json` が `/manifests`（= `services/` のみをマウント）の外にある。
 
@@ -108,8 +107,7 @@ docker compose -f infra/watchtower/docker-compose.yml up -d
 
 ### Environment Protection（推奨）
 
-deploy-trigger.yml が `environment: production` を指定しているが、
-GitHub 側で Environment を作成しないと保護が効かない。
+deploy-trigger.yml が `environment: production` を指定しているが、GitHub 側で Environment を作成しないと保護が効かない。
 
 設定場所：`Settings > Environments > New environment`、名前: `production`
 

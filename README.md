@@ -5,6 +5,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/sora-kisaragi/HomeAssistantServicies)](https://github.com/sora-kisaragi/HomeAssistantServicies/commits/main)
 
 PlaywrightMCP・SearXNG などの OSS コンテナをまとめて管理するリポジトリです。
+
 各サービスの Docker Compose 設定、自動デプロイ、ヘルスチェックをここで一元管理します。
 
 > **自分のサーバーで使いたい場合は Fork してください。**
@@ -50,6 +51,7 @@ services/<name>/
 ## API レスポンス例
 
 `GET http://<server>:8765/api/services` を叩くとこのような JSON が返ります。
+
 フロントエンドはこれを使ってサービス一覧を動的に表示できます。
 
 ```json
