@@ -111,7 +111,7 @@ CI が通ったら **Squash and merge** でマージします。
   → 複数コミットがそのまま main に入る（スカッシュの意味がない）
 ```
 
-マージしたら `main` が即デプロイされます（self-hosted runner 経由）。
+マージしたら、サーバーで `git pull && bash scripts/deploy.sh` を手動実行してデプロイします。
 ブランチは GitHub の UI からそのまま削除してください。
 
 ---
