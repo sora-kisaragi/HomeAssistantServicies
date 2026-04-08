@@ -35,7 +35,7 @@
 
 **いつ動く？** → `main` ブランチへの PR を作成・更新したとき
 
-**何をするか？** GitHub のクラウドサーバー（ubuntu-latest）上で以下を実行します：
+**何をするか？** GitHub のクラウドサーバー（ubuntu-latest）上で以下を実行します。
 
 ### ステップ1：必須ファイルの確認
 
@@ -53,6 +53,7 @@ README.md
 ### ステップ2：docker compose の構文チェック
 
 各サービスの `docker-compose.yml` を `docker compose config` コマンドで検証します。
+
 YAML の書き方ミスや、存在しない設定キーを検出できます。
 
 > **ポイント**：検証時は `.env.example` の内容を仮の `.env` として使います。
@@ -75,6 +76,7 @@ YAML の書き方ミスや、存在しない設定キーを検出できます。
 **何をするか？** main へのマージをトリガーに CI が通ったことを確認した後、サーバーで手動で `scripts/deploy.sh` を実行します。
 
 > **自動デプロイ（self-hosted runner）は使用しない方針です。**
+>
 > main マージ後はサーバーにログインして `git pull && bash scripts/deploy.sh` を手動実行してください。
 
 ### deploy.sh の動作
@@ -102,6 +104,7 @@ YAML の書き方ミスや、存在しない設定キーを検出できます。
 ### 変更されたサービスだけ再起動する理由
 
 全サービスを毎回再起動すると、変更に無関係なサービスも一時的に停止します。
+
 `deploy.sh` は `git diff` で変更ファイルを調べて、関係するサービスだけ再起動します。
 
 例：SearXNG の設定だけ変えた PR をマージ → SearXNG だけ再起動、PlaywrightMCP は停止しない。
@@ -116,7 +119,7 @@ YAML の書き方ミスや、存在しない設定キーを検出できます。
 https://github.com/sora-kisaragi/HomeAssistantServicies/actions
 ```
 
-デプロイが失敗した場合、ここでエラーの詳細を確認できます。
+デプロイが失敗した場合はここでエラーの詳細を確認できます。
 
 ---
 

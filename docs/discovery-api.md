@@ -4,8 +4,7 @@
 
 フロントエンドが「今どんなサービスが動いているか」を知るための API です。
 
-フロントエンドが毎回 `docker ps` を実行するわけにはいかないので、
-代わりに discovery-api が Docker を調べて JSON で返します。
+フロントエンドが毎回 `docker ps` を実行するわけにはいかないので、代わりに discovery-api が Docker を調べて JSON で返します。
 
 ```text
 フロントエンド
@@ -110,13 +109,11 @@ labels:
   homeassistant.port: "8080"
 ```
 
-discovery-api は Docker ソケット経由で「`homeassistant.service=true` ラベルを持つコンテナ」
-を検索し、それをサービス一覧のベースにします。
+discovery-api は Docker ソケット経由で「`homeassistant.service=true` ラベルを持つコンテナ」を検索し、それをサービス一覧のベースにします。
 
 ### 方法②：manifest.json を読む（停止中も含む）
 
-`/manifests` ディレクトリ（= リポジトリの `services/` をマウント）にある
-各サービスの `manifest.json` を読み込みます。
+`/manifests` ディレクトリ（= リポジトリの `services/` をマウント）にある各サービスの `manifest.json` を読み込みます。
 
 これにより、コンテナが停止していても「登録されているが停止中」として一覧に表示されます。
 
@@ -145,11 +142,9 @@ Docker で実際に動いているコンテナ（ラベル付き）
 }
 ```
 
-`GET /api/services` が呼ばれるたびに、discovery-api が各サービスの
-`http://<サービス名>:<ポート>/healthz` を実際に叩いて応答を確認します。
+`GET /api/services` が呼ばれるたびに、discovery-api が各サービスの `http://<サービス名>:<ポート>/healthz` を実際に叩いて応答を確認します。
 
-コンテナ同士は `homeassistant` Docker ネットワークで繋がっているため、
-`http://searxng:8080/healthz` のようにコンテナ名で直接アクセスできます。
+コンテナ同士は `homeassistant` Docker ネットワークで繋がっているため、`http://searxng:8080/healthz` のようにコンテナ名で直接アクセスできます。
 
 ---
 
@@ -178,14 +173,13 @@ Docker で実際に動いているコンテナ（ラベル付き）
 
 ## Swagger UI で試す
 
-`discovery-api` が起動していれば、ブラウザで以下を開くと
-インタラクティブに API を試せます：
+`discovery-api` が起動していれば、ブラウザで以下を開くとインタラクティブに API を試せます。
 
 ```text
 http://<サーバーのIPアドレス>:8765/docs
 ```
 
-ローカルで動かしている場合：
+ローカルで動かしている場合はこちら：
 
 ```text
 http://localhost:8765/docs

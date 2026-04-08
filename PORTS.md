@@ -1,6 +1,7 @@
 # Port Allocation
 
 This file is the single source of truth for port assignments.
+
 Check here before adding a new service to avoid conflicts.
 
 | Port | Service           | Notes                        |

@@ -1,6 +1,7 @@
 # PlaywrightMCP
 
 Playwright を使ったブラウザ自動化の MCP (Model Context Protocol) サーバー。
+
 LLM（Claude等）からブラウザ操作・スクリーンショット取得・Web スクレイピング等が可能になる。
 
 - **Port**: 3000
@@ -38,4 +39,5 @@ curl http://localhost:3000/
 ## 注意事項
 
 - ブラウザ操作を伴うため、サーバーリソース（メモリ・CPU）を消費する
+
 - 本番環境では適切なアクセス制御を設けること
