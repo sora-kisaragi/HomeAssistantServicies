@@ -32,7 +32,7 @@
 
 一連の作業が完了したタイミングで、**依頼されなくても** push して PR を作成する。
 
-- **ベースブランチ**：`main`
+- **ベースブランチ**：`develop`（`develop` → `main` のデプロイ PR のみ `main`）
 - **PR タイトル**：Conventional Commits 形式（英語）
 - **PR 本文テンプレート**：
 
