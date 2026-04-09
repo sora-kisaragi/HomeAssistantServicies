@@ -8,8 +8,8 @@ services:
     ports:
       - "8765:8765"
     volumes:
-      # Docker socket (read-only) to inspect running containers
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Docker socket — rw required for on-demand start/stop control
+      - /var/run/docker.sock:/var/run/docker.sock
       # Mount project root so all manifest.json files are discoverable
       - ..:/manifests:ro
     env_file:

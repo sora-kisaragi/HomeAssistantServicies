@@ -1,0 +1,15 @@
+{
+  "id": "watcher-ui",
+  "display_name": "Watcher UI",
+  "description": "サービス管理ダッシュボード。起動・停止・リソース監視・未登録コンテナ検出を GUI で提供する。",
+  "category": "infrastructure",
+  "port": 8767,
+  "internal_url": "http://watcher-ui:8767",
+  "icon": "dashboard",
+  "tags": ["gui", "monitoring", "infrastructure"],
+  "health_check": {
+    "path": "/",
+    "expected_status": 200
+  },
+  "env_vars": ["WATCHER_UI_PORT", "DISCOVERY_API_URL", "POLL_INTERVAL"]
+}

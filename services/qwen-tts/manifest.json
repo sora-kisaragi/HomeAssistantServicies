@@ -1,0 +1,19 @@
+{
+  "id": "qwen-tts",
+  "display_name": "Qwen TTS",
+  "description": "Qwen2.5-TTS による高品質テキスト読み上げサービス。OpenAI 互換 API で音声合成を提供する。",
+  "category": "ai",
+  "port": 9002,
+  "internal_url": "http://qwen-tts:9002",
+  "icon": "volume_up",
+  "tags": ["tts", "gpu", "on-demand", "ai", "qwen"],
+  "docs_url": "https://huggingface.co/Qwen/Qwen2.5-TTS-3B",
+  "on_demand": true,
+  "gpu_required": true,
+  "idle_timeout_seconds": 3600,
+  "health_check": {
+    "path": "/health",
+    "expected_status": 200
+  },
+  "env_vars": ["QWEN_TTS_PORT", "QWEN_TTS_MODEL"]
+}
