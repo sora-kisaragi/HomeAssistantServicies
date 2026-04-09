@@ -7,7 +7,7 @@
   "internal_url": "http://qwen-tts:9002",
   "icon": "volume_up",
   "tags": ["tts", "gpu", "on-demand", "ai", "qwen"],
-  "docs_url": "https://huggingface.co/Qwen/Qwen2.5-TTS-3B",
+  "docs_url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base",
   "on_demand": true,
   "gpu_required": true,
   "idle_timeout_seconds": 3600,

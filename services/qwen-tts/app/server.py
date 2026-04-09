@@ -11,46 +11,40 @@ import torch
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
-from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+from transformers import pipeline
 
 logger = logging.getLogger("qwen-tts")
 logging.basicConfig(level=logging.INFO)
 
-MODEL_ID = os.getenv("QWEN_TTS_MODEL", "Qwen/Qwen2.5-TTS-3B")
-HF_TOKEN = os.getenv("HF_TOKEN") or None  # required for gated models
+MODEL_ID = os.getenv("QWEN_TTS_MODEL", "Qwen/Qwen3-TTS-12Hz-1.7B-Base")
+HF_TOKEN = os.getenv("HF_TOKEN") or None
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-SAMPLE_RATE = 24000
 
-model = None
-processor = None
+tts_pipe = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global model, processor
+    global tts_pipe
     if not HF_TOKEN:
-        logger.warning(
-            "HF_TOKEN is not set. Gated models (e.g. Qwen2.5-TTS) will fail to download. "
-            "Set HF_TOKEN in .env or environment."
-        )
+        logger.warning("HF_TOKEN is not set. Set it if the model requires authentication.")
     logger.info("Loading model: %s on %s", MODEL_ID, DEVICE)
-    processor = AutoProcessor.from_pretrained(MODEL_ID, token=HF_TOKEN)
-    model = AutoModelForSpeechSeq2Seq.from_pretrained(
-        MODEL_ID,
-        torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
-        device_map=DEVICE,
+    tts_pipe = pipeline(
+        "text-to-speech",
+        model=MODEL_ID,
         token=HF_TOKEN,
+        torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
+        device=0 if DEVICE == "cuda" else -1,
     )
     logger.info("Model loaded.")
     yield
-    model = None
-    processor = None
+    tts_pipe = None
 
 
 app = FastAPI(
     title="Qwen TTS",
-    description="QwenTTS — OpenAI-compatible text-to-speech API",
-    version="1.0.0",
+    description="Qwen3-TTS — OpenAI-compatible text-to-speech API",
+    version="2.0.0",
     lifespan=lifespan,
 )
 
@@ -63,21 +57,25 @@ class SpeechRequest(BaseModel):
     speed: float = 1.0
 
 
-def synthesize(text: str, speed: float = 1.0) -> bytes:
+def synthesize(text: str) -> bytes:
     """テキストを WAV バイト列に変換する。"""
-    inputs = processor(text=text, return_tensors="pt").to(DEVICE)
-    with torch.no_grad():
-        output = model.generate(**inputs)
-    audio = output[0].float().cpu().numpy()
+    output = tts_pipe(text)
+    audio = output["audio"]
+    sampling_rate = output["sampling_rate"]
+
+    # (channels, samples) or (samples,) の両方に対応
+    if hasattr(audio, "ndim") and audio.ndim == 2:
+        audio = audio[0]
+
     buf = io.BytesIO()
-    sf.write(buf, audio, SAMPLE_RATE, format="WAV")
+    sf.write(buf, audio, sampling_rate, format="WAV")
     return buf.getvalue()
 
 
 @app.get("/health")
 async def health():
     return {
-        "status": "ok" if model is not None else "loading",
+        "status": "ok" if tts_pipe is not None else "loading",
         "model": MODEL_ID,
         "device": DEVICE,
     }
@@ -86,14 +84,14 @@ async def health():
 @app.post("/v1/audio/speech")
 async def create_speech(req: SpeechRequest):
     """OpenAI 互換 TTS エンドポイント。"""
-    if model is None:
+    if tts_pipe is None:
         raise HTTPException(status_code=503, detail="Model is still loading")
     if not req.input:
         raise HTTPException(status_code=400, detail="input text is required")
 
     start = time.monotonic()
     try:
-        audio_bytes = synthesize(req.input, req.speed)
+        audio_bytes = synthesize(req.input)
     except Exception as e:
         logger.exception("Synthesis failed")
         raise HTTPException(status_code=500, detail=str(e)) from e
