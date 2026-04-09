@@ -1,5 +1,10 @@
 # Faster Whisper
 
+> **現在起動対象外**
+> ARM64（DGX Spark / GB10）向け CUDA イメージが upstream に存在しないため、
+> 現時点では起動対象から除外しています。
+> 対応状況は [Issue #9](https://github.com/sora-kisaragi/HomeAssistantServicies/issues/9) を参照。
+
 OpenAI Whisper ベースの高速 STT（音声認識）サービス。
 
 GPU を使用してリアルタイムに近い速度で文字起こしを行う。

@@ -7,6 +7,8 @@
   "internal_url": "http://faster-whisper:8000",
   "icon": "mic",
   "tags": ["stt", "whisper", "gpu", "on-demand", "ai"],
+  "enabled": false,
+  "disabled_reason": "ARM64 CUDA image not yet available. See https://github.com/sora-kisaragi/HomeAssistantServicies/issues/9",
   "docs_url": "https://github.com/fedirz/faster-whisper-server",
   "on_demand": true,
   "gpu_required": true,

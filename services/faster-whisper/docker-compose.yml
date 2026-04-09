@@ -1,7 +1,9 @@
 services:
   faster-whisper:
-    # latest = CPU mode, ARM64 compatible (no amd64-only CUDA image available yet)
-    # Switch to latest-cuda when an arm64 CUDA build is published
+    # NOTE: ARM64 CUDA image not yet available for faster-whisper-server.
+    # This service is currently EXCLUDED from startup targets.
+    # See: https://github.com/sora-kisaragi/HomeAssistantServicies/issues/9
+    # TODO: switch to arm64 CUDA image when upstream publishes one.
     image: ghcr.io/fedirz/faster-whisper-server:latest
     container_name: faster-whisper
     restart: "no"
