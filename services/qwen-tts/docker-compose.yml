@@ -17,6 +17,7 @@ services:
     environment:
       - QWEN_TTS_MODEL=${QWEN_TTS_MODEL:-Qwen/Qwen2.5-TTS-3B}
       - HF_HOME=/root/.cache/huggingface
+      - HF_TOKEN=${HF_TOKEN:-}
     volumes:
       - qwen-tts-cache:/root/.cache/huggingface
     env_file:

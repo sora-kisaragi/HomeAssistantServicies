@@ -17,6 +17,7 @@ logger = logging.getLogger("qwen-tts")
 logging.basicConfig(level=logging.INFO)
 
 MODEL_ID = os.getenv("QWEN_TTS_MODEL", "Qwen/Qwen2.5-TTS-3B")
+HF_TOKEN = os.getenv("HF_TOKEN") or None  # required for gated models
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 SAMPLE_RATE = 24000
 
@@ -27,12 +28,18 @@ processor = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model, processor
+    if not HF_TOKEN:
+        logger.warning(
+            "HF_TOKEN is not set. Gated models (e.g. Qwen2.5-TTS) will fail to download. "
+            "Set HF_TOKEN in .env or environment."
+        )
     logger.info("Loading model: %s on %s", MODEL_ID, DEVICE)
-    processor = AutoProcessor.from_pretrained(MODEL_ID)
+    processor = AutoProcessor.from_pretrained(MODEL_ID, token=HF_TOKEN)
     model = AutoModelForSpeechSeq2Seq.from_pretrained(
         MODEL_ID,
         torch_dtype=torch.float16 if DEVICE == "cuda" else torch.float32,
         device_map=DEVICE,
+        token=HF_TOKEN,
     )
     logger.info("Model loaded.")
     yield
