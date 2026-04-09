@@ -1,7 +1,8 @@
 # torch is provided by the NGC base image — do not reinstall
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
-transformers>=4.45.0
+# transformers from git: qwen3_tts arch not yet in a stable release
+git+https://github.com/huggingface/transformers.git
 accelerate>=0.34.0
 soundfile>=0.12.1
 numpy>=1.26.0
