@@ -1,0 +1,48 @@
+services:
+  faster-whisper:
+    # NOTE: ARM64 CUDA image not yet available for faster-whisper-server.
+    # This service is currently EXCLUDED from startup targets.
+    # See: https://github.com/sora-kisaragi/HomeAssistantServicies/issues/9
+    # TODO: switch to arm64 CUDA image when upstream publishes one.
+    image: ghcr.io/fedirz/faster-whisper-server:latest
+    container_name: faster-whisper
+    restart: "no"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "${FASTER_WHISPER_PORT:-9001}:8000"
+    environment:
+      - WHISPER__MODEL=${WHISPER_MODEL:-large-v3}
+    volumes:
+      - faster-whisper-cache:/root/.cache/huggingface
+    env_file:
+      - ../../.env
+      - path: .env
+        required: false
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "faster-whisper"
+      homeassistant.display_name: "Faster Whisper"
+      homeassistant.description: "OpenAI Whisper ベースの高速 STT サービス"
+      homeassistant.category: "ai"
+      homeassistant.port: "${FASTER_WHISPER_PORT:-9001}"
+      homeassistant.icon: "mic"
+      homeassistant.on-demand: "true"
+      homeassistant.idle-timeout: "3600"
+      homeassistant.gpu-required: "true"
+      com.centurylinklabs.watchtower.enable: "false"
+    networks:
+      - homeassistant
+
+volumes:
+  faster-whisper-cache:
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

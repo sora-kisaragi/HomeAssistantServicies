@@ -1,0 +1,31 @@
+services:
+  watcher-ui:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: watcher-ui
+    restart: unless-stopped
+    ports:
+      - "${WATCHER_UI_PORT:-8767}:8767"
+    environment:
+      - DISCOVERY_API_URL=${DISCOVERY_API_URL:-http://discovery-api:8765}
+      - POLL_INTERVAL=${POLL_INTERVAL:-5}
+    env_file:
+      - ../../.env
+      - path: .env
+        required: false
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "watcher-ui"
+      homeassistant.display_name: "Watcher UI"
+      homeassistant.description: "サービス管理ダッシュボード — 起動・停止・リソース監視"
+      homeassistant.category: "infrastructure"
+      homeassistant.port: "${WATCHER_UI_PORT:-8767}"
+      homeassistant.icon: "dashboard"
+    networks:
+      - homeassistant
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant

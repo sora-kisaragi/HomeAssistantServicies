@@ -1,0 +1,21 @@
+{
+  "id": "faster-whisper",
+  "display_name": "Faster Whisper",
+  "description": "OpenAI Whisper ベースの高速 STT（音声認識）サービス。GPU を使用してリアルタイムに近い速度で文字起こしを行う。",
+  "category": "ai",
+  "port": 9001,
+  "internal_url": "http://faster-whisper:8000",
+  "icon": "mic",
+  "tags": ["stt", "whisper", "gpu", "on-demand", "ai"],
+  "enabled": false,
+  "disabled_reason": "ARM64 CUDA image not yet available. See https://github.com/sora-kisaragi/HomeAssistantServicies/issues/9",
+  "docs_url": "https://github.com/fedirz/faster-whisper-server",
+  "on_demand": true,
+  "gpu_required": true,
+  "idle_timeout_seconds": 3600,
+  "health_check": {
+    "path": "/health",
+    "expected_status": 200
+  },
+  "env_vars": ["FASTER_WHISPER_PORT", "WHISPER_MODEL"]
+}

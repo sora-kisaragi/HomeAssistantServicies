@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HomeAssistant Watcher</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body x-data="watcher()" x-init="init()">
+
+  <header>
+    <h1>HomeAssistant Watcher</h1>
+    <span class="live-badge" :class="connected ? 'live' : 'disconnected'">
+      <span x-text="connected ? '● LIVE' : '○ 切断'"></span>
+    </span>
+  </header>
+
+  <!-- GPU Stats -->
+  <template x-if="gpu.available">
+    <section class="gpu-section">
+      <h2>GPU</h2>
+      <div class="gpu-cards">
+        <template x-for="g in gpu.gpus" :key="g.index">
+          <div class="gpu-card">
+            <div class="gpu-name" x-text="g.name"></div>
+            <div class="stat-row">
+              <span>使用率</span>
+              <div class="bar-wrap"><div class="bar" :style="`width:${g.utilization_percent ?? 0}%`"></div></div>
+              <span x-text="g.utilization_percent !== null ? g.utilization_percent + '%' : 'N/A'"></span>
+            </div>
+            <!-- 統合メモリ GPU (GB10 等) は memory が null になるため非表示 -->
+            <template x-if="!g.unified_memory">
+              <div class="stat-row">
+                <span>VRAM</span>
+                <div class="bar-wrap">
+                  <div class="bar" :style="`width:${Math.round(g.memory_used_mb/g.memory_total_mb*100)}%`"></div>
+                </div>
+                <span x-text="Math.round(g.memory_used_mb/1024) + '/' + Math.round(g.memory_total_mb/1024) + ' GB'"></span>
+              </div>
+            </template>
+            <template x-if="g.unified_memory">
+              <div class="stat-row"><span>VRAM</span><span>統合メモリ (N/A)</span></div>
+            </template>
+            <div class="gpu-temp" x-text="g.temperature_c !== null ? g.temperature_c + '°C' : ''"></div>
+          </div>
+        </template>
+      </div>
+    </section>
+  </template>
+
+  <!-- Filter tabs -->
+  <section class="filter-tabs">
+    <button :class="filter==='all' && 'active'" @click="filter='all'">すべて</button>
+    <button :class="filter==='running' && 'active'" @click="filter='running'">稼働中</button>
+    <button :class="filter==='stopped' && 'active'" @click="filter='stopped'">停止中</button>
+    <button :class="filter==='gpu' && 'active'" @click="filter='gpu'">GPU</button>
+    <button :class="filter==='on_demand' && 'active'" @click="filter='on_demand'">オンデマンド</button>
+    <button :class="filter==='unregistered' && 'active'" @click="filter='unregistered'">
+      未登録
+      <template x-if="unregistered.count > 0">
+        <span class="badge" x-text="unregistered.count"></span>
+      </template>
+    </button>
+  </section>
+
+  <!-- Service list -->
+  <section class="service-list" x-show="filter !== 'unregistered'">
+    <template x-for="svc in filteredServices" :key="svc.id">
+      <div class="service-card" :class="svc.status">
+        <div class="service-header">
+          <div class="service-name">
+            <span x-text="svc.display_name"></span>
+            <template x-if="svc.gpu_required">
+              <span class="tag gpu">GPU</span>
+            </template>
+            <template x-if="svc.on_demand">
+              <span class="tag on-demand">オンデマンド</span>
+            </template>
+          </div>
+          <div class="service-status" :class="svc.status">
+            <span x-text="statusLabel(svc.status)"></span>
+          </div>
+        </div>
+
+        <div class="service-meta">
+          <template x-if="svc.port">
+            <span x-text="':' + svc.port"></span>
+          </template>
+          <template x-if="svc.tags && svc.tags.length">
+            <span class="tags">
+              <template x-for="tag in svc.tags" :key="tag">
+                <span class="tag" x-text="tag"></span>
+              </template>
+            </span>
+          </template>
+        </div>
+
+        <!-- CPU/MEM stats (running のみ) -->
+        <template x-if="svc.status === 'running' && stats[svc.id]">
+          <div class="resource-stats">
+            <div class="stat-row">
+              <span>CPU</span>
+              <div class="bar-wrap"><div class="bar" :style="`width:${Math.min(stats[svc.id].cpu_percent,100)}%`"></div></div>
+              <span x-text="stats[svc.id].cpu_percent + '%'"></span>
+            </div>
+            <div class="stat-row">
+              <span>MEM</span>
+              <div class="bar-wrap"><div class="bar" :style="`width:${stats[svc.id].memory_percent}%`"></div></div>
+              <span x-text="stats[svc.id].memory_percent + '%'"></span>
+            </div>
+          </div>
+        </template>
+
+        <!-- Idle timer -->
+        <template x-if="svc.on_demand && svc.idle_remaining_seconds !== null">
+          <div class="idle-timer">
+            アイドル残り: <span x-text="formatSeconds(svc.idle_remaining_seconds)"></span>
+          </div>
+        </template>
+
+        <!-- Health -->
+        <template x-if="svc.health">
+          <div class="health" :class="svc.health.status">
+            <span x-text="svc.health.status"></span>
+            <template x-if="svc.health.response_time_ms !== null">
+              <span x-text="' (' + svc.health.response_time_ms + 'ms)'"></span>
+            </template>
+          </div>
+        </template>
+
+        <!-- Controls -->
+        <div class="controls">
+          <template x-if="svc.status !== 'running'">
+            <button class="btn start" @click="startService(svc.id)" :disabled="pending[svc.id]">
+              <span x-text="pending[svc.id] ? '起動中...' : '起動'"></span>
+            </button>
+          </template>
+          <template x-if="svc.status === 'running'">
+            <button class="btn stop" @click="stopService(svc.id)" :disabled="pending[svc.id]">
+              <span x-text="pending[svc.id] ? '停止中...' : '停止'"></span>
+            </button>
+          </template>
+          <template x-if="svc.docs_url">
+            <a class="btn docs" :href="svc.docs_url" target="_blank" rel="noopener">Docs</a>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <template x-if="filteredServices.length === 0">
+      <p class="empty">サービスが見つかりません。</p>
+    </template>
+  </section>
+
+  <!-- Unregistered containers -->
+  <section class="service-list" x-show="filter === 'unregistered'">
+    <template x-if="unregistered.count === 0">
+      <p class="empty">未登録コンテナはありません。</p>
+    </template>
+    <template x-for="c in unregistered.unregistered" :key="c.name">
+      <div class="service-card unregistered">
+        <div class="service-header">
+          <div class="service-name">
+            <span x-text="c.name"></span>
+            <span class="tag warn">未登録</span>
+          </div>
+          <div class="service-status" :class="c.status" x-text="c.status"></div>
+        </div>
+        <div class="service-meta" x-text="c.image"></div>
+        <div class="register-hint">
+          <p>このリポジトリに登録するには：</p>
+          <code x-text="c.hint"></code>
+        </div>
+      </div>
+    </template>
+  </section>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

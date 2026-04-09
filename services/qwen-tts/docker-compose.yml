@@ -1,0 +1,48 @@
+services:
+  qwen-tts:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: qwen-tts
+    restart: "no"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "${QWEN_TTS_PORT:-9002}:9002"
+    environment:
+      - QWEN_TTS_MODEL=${QWEN_TTS_MODEL:-Qwen/Qwen3-TTS-12Hz-1.7B-Base}
+      - HF_HOME=/root/.cache/huggingface
+      - HF_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - qwen-tts-cache:/root/.cache/huggingface
+    env_file:
+      - ../../.env
+      - path: .env
+        required: false
+    labels:
+      homeassistant.service: "true"
+      homeassistant.name: "qwen-tts"
+      homeassistant.display_name: "Qwen TTS"
+      homeassistant.description: "Qwen2.5-TTS による高品質テキスト読み上げサービス"
+      homeassistant.category: "ai"
+      homeassistant.port: "${QWEN_TTS_PORT:-9002}"
+      homeassistant.icon: "volume_up"
+      homeassistant.on-demand: "true"
+      homeassistant.idle-timeout: "3600"
+      homeassistant.gpu-required: "true"
+      com.centurylinklabs.watchtower.enable: "false"
+    networks:
+      - homeassistant
+
+volumes:
+  qwen-tts-cache:
+
+networks:
+  homeassistant:
+    external: true
+    name: homeassistant
