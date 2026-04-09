@@ -25,17 +25,23 @@
             <div class="gpu-name" x-text="g.name"></div>
             <div class="stat-row">
               <span>使用率</span>
-              <div class="bar-wrap"><div class="bar" :style="`width:${g.utilization_percent}%`"></div></div>
-              <span x-text="g.utilization_percent + '%'"></span>
+              <div class="bar-wrap"><div class="bar" :style="`width:${g.utilization_percent ?? 0}%`"></div></div>
+              <span x-text="g.utilization_percent !== null ? g.utilization_percent + '%' : 'N/A'"></span>
             </div>
-            <div class="stat-row">
-              <span>VRAM</span>
-              <div class="bar-wrap">
-                <div class="bar" :style="`width:${Math.round(g.memory_used_mb/g.memory_total_mb*100)}%`"></div>
+            <!-- 統合メモリ GPU (GB10 等) は memory が null になるため非表示 -->
+            <template x-if="!g.unified_memory">
+              <div class="stat-row">
+                <span>VRAM</span>
+                <div class="bar-wrap">
+                  <div class="bar" :style="`width:${Math.round(g.memory_used_mb/g.memory_total_mb*100)}%`"></div>
+                </div>
+                <span x-text="Math.round(g.memory_used_mb/1024) + '/' + Math.round(g.memory_total_mb/1024) + ' GB'"></span>
               </div>
-              <span x-text="Math.round(g.memory_used_mb/1024) + '/' + Math.round(g.memory_total_mb/1024) + ' GB'"></span>
-            </div>
-            <div class="gpu-temp" x-text="g.temperature_c + '°C'"></div>
+            </template>
+            <template x-if="g.unified_memory">
+              <div class="stat-row"><span>VRAM</span><span>統合メモリ (N/A)</span></div>
+            </template>
+            <div class="gpu-temp" x-text="g.temperature_c !== null ? g.temperature_c + '°C' : ''"></div>
           </div>
         </template>
       </div>

@@ -1,6 +1,6 @@
 services:
   faster-whisper:
-    image: ghcr.io/fedirz/faster-whisper-server:latest-cuda
+    image: ghcr.io/fedirz/faster-whisper-server:latest-gpu
     container_name: faster-whisper
     restart: "no"
     deploy:

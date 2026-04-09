@@ -1,5 +1,6 @@
 # hadolint global ignore=DL3013
-FROM pytorch/pytorch:2.3.0-cuda12.1-cudnn8-runtime
+# NGC PyTorch — supports linux/arm64 (Grace-Hopper / DGX Spark) and linux/amd64
+FROM nvcr.io/nvidia/pytorch:25.03-py3
 
 WORKDIR /app
 

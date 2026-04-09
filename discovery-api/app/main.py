@@ -260,6 +260,14 @@ async def _idle_monitor_loop() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _parse_int_or_none(value: str) -> int | None:
+    """nvidia-smi の値を int に変換する。"[N/A]" 等は None を返す（GB10 統合メモリ対応）。"""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return None
+
+
 def _get_gpu_stats() -> list[dict]:
     """nvidia-smi で GPU 情報を取得する。利用不可の場合は空リストを返す。"""
     try:
@@ -279,12 +287,14 @@ def _get_gpu_stats() -> list[dict]:
             if len(parts) == 6:
                 gpus.append(
                     {
-                        "index": int(parts[0]),
+                        "index": _parse_int_or_none(parts[0]),
                         "name": parts[1],
-                        "utilization_percent": int(parts[2]),
-                        "memory_used_mb": int(parts[3]),
-                        "memory_total_mb": int(parts[4]),
-                        "temperature_c": int(parts[5]),
+                        "utilization_percent": _parse_int_or_none(parts[2]),
+                        "memory_used_mb": _parse_int_or_none(parts[3]),
+                        "memory_total_mb": _parse_int_or_none(parts[4]),
+                        "temperature_c": _parse_int_or_none(parts[5]),
+                        # GB10 など統合メモリ GPU は memory フィールドが N/A になる
+                        "unified_memory": _parse_int_or_none(parts[3]) is None,
                     }
                 )
         return gpus
