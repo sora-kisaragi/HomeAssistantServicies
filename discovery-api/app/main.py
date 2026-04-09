@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 import socket
-import subprocess
 import time
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -10,6 +9,7 @@ from pathlib import Path
 
 import docker
 import httpx
+import pynvml
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -260,46 +260,70 @@ async def _idle_monitor_loop() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _parse_int_or_none(value: str) -> int | None:
-    """nvidia-smi の値を int に変換する。"[N/A]" 等は None を返す（GB10 統合メモリ対応）。"""
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        return None
-
-
 def _get_gpu_stats() -> list[dict]:
-    """nvidia-smi で GPU 情報を取得する。利用不可の場合は空リストを返す。"""
+    """pynvml で GPU 情報を取得する。利用不可の場合は空リストを返す。
+    GB10 (Grace-Hopper) など統合メモリ GPU も安全に扱う。
+    """
     try:
-        result = subprocess.run(
-            [
-                "nvidia-smi",
-                "--query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu",
-                "--format=csv,noheader,nounits",
-            ],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        gpus = []
-        for line in result.stdout.strip().splitlines():
-            parts = [p.strip() for p in line.split(",")]
-            if len(parts) == 6:
-                gpus.append(
-                    {
-                        "index": _parse_int_or_none(parts[0]),
-                        "name": parts[1],
-                        "utilization_percent": _parse_int_or_none(parts[2]),
-                        "memory_used_mb": _parse_int_or_none(parts[3]),
-                        "memory_total_mb": _parse_int_or_none(parts[4]),
-                        "temperature_c": _parse_int_or_none(parts[5]),
-                        # GB10 など統合メモリ GPU は memory フィールドが N/A になる
-                        "unified_memory": _parse_int_or_none(parts[3]) is None,
-                    }
-                )
-        return gpus
-    except Exception:
+        pynvml.nvmlInit()
+    except pynvml.NVMLError:
         return []
+
+    gpus = []
+    try:
+        count = pynvml.nvmlDeviceGetCount()
+        for i in range(count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            name = pynvml.nvmlDeviceGetName(handle)
+            if isinstance(name, bytes):
+                name = name.decode()
+
+            # 使用率
+            try:
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                utilization_percent: int | None = util.gpu
+            except pynvml.NVMLError:
+                utilization_percent = None
+
+            # メモリ（GB10 等の統合メモリ GPU は NVML_ERROR_NOT_SUPPORTED）
+            unified_memory = False
+            memory_used_mb: int | None = None
+            memory_total_mb: int | None = None
+            try:
+                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                memory_used_mb = mem.used // (1024 * 1024)
+                memory_total_mb = mem.total // (1024 * 1024)
+            except pynvml.NVMLError:
+                unified_memory = True
+
+            # 温度
+            try:
+                temperature_c: int | None = pynvml.nvmlDeviceGetTemperature(
+                    handle, pynvml.NVML_TEMPERATURE_GPU
+                )
+            except pynvml.NVMLError:
+                temperature_c = None
+
+            gpus.append(
+                {
+                    "index": i,
+                    "name": name,
+                    "utilization_percent": utilization_percent,
+                    "memory_used_mb": memory_used_mb,
+                    "memory_total_mb": memory_total_mb,
+                    "temperature_c": temperature_c,
+                    "unified_memory": unified_memory,
+                }
+            )
+    except pynvml.NVMLError:
+        pass
+    finally:
+        try:
+            pynvml.nvmlShutdown()
+        except pynvml.NVMLError:
+            pass
+
+    return gpus
 
 
 # ===========================================================================

@@ -1,6 +1,8 @@
 services:
   faster-whisper:
-    image: ghcr.io/fedirz/faster-whisper-server:latest-gpu
+    # latest = CPU mode, ARM64 compatible (no amd64-only CUDA image available yet)
+    # Switch to latest-cuda when an arm64 CUDA build is published
+    image: ghcr.io/fedirz/faster-whisper-server:latest
     container_name: faster-whisper
     restart: "no"
     deploy:
