@@ -1,3 +1,6 @@
+# [k3s移行済み 2026-07-21] 現在はk3s上で稼働中。このcompose.ymlは復元用の記録として保持。
+# app/ は現在もk3s用イメージのビルドソースなので削除しないこと。
+# マニフェスト正本: ~/k3s-manifests/homeassistant/watcher-ui.yaml
 services:
   watcher-ui:
     build:
