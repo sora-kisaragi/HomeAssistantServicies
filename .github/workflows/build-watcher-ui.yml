@@ -1,0 +1,30 @@
+name: Build and push watcher-ui k3s image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - services/watcher-ui/app/**
+
+concurrency:
+  group: build-watcher-ui
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: [self-hosted, dgx-spark]
+    defaults:
+      run:
+        working-directory: services/watcher-ui/app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image tag
+        id: tag
+        run: echo "tag=$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        run: docker build -t 192.168.1.17:30500/watcher-ui:${{ steps.tag.outputs.tag }} .
+
+      - name: Push
+        run: docker push 192.168.1.17:30500/watcher-ui:${{ steps.tag.outputs.tag }}
